@@ -278,6 +278,8 @@ export interface NodeState {
   sensorBlindUntil: number;
   hardened: boolean;
   isolated: boolean;
+  /** Simulation time at which the asset was last isolated. */
+  isolatedAt: number;
   honeypot: boolean;
   manipSince: number;
 }

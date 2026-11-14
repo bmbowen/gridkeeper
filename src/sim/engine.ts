@@ -5,6 +5,7 @@ import {
   DEFAULT_EFFECT,
   DT,
   ISOLATION_OPS_COST,
+  LOCAL_WEAR,
   MAX_OPS_PENALTY,
   PROFILES,
   TIMES,
@@ -168,6 +169,7 @@ export function createGame(m: MissionDef, mods: Partial<Mods> = {}, seed?: numbe
       sensorBlindUntil: 0,
       hardened: false,
       isolated: false,
+      isolatedAt: 0,
       honeypot: false,
       manipSince: -1,
     };
@@ -404,6 +406,7 @@ export function command(g: GameState, m: MissionDef, c: Command): CommandResult 
       return OK;
     case "isolate":
       g.nodes[c.node].isolated = true;
+      g.nodes[c.node].isolatedAt = g.time;
       g.stats.isolations++;
       emit(g, { type: "isolate", node: c.node });
       return OK;
@@ -897,6 +900,10 @@ function stepPhysical(g: GameState, m: MissionDef, dt: number) {
       }
     }
 
+    // Local manual is a stop-gap: without supervisory control the unit wears, so a controller
+    // cannot simply be left isolated for the whole shift.
+    if (s.local && avail > 0) s.condition = Math.max(0, s.condition - LOCAL_WEAR * dt);
+
     let inF = combineInputs(g, m, d, s.setpoint);
     if (d.buffer) {
       // Tank: fills from surplus inflow, drains to cover a shortfall.
@@ -972,7 +979,11 @@ function endlessWave(g: GameState, m: MissionDef) {
     if (profile === "saboteur") objectives.push({ node: rngPick(g, topo.controllers), action: "manipulate" });
     spawnThreat(g, m, { at: g.time, profile, entry, objectives });
   }
-  const gap = Math.max(7, 26 - intensity * 2.2) * (0.8 + rngNext(g) * 0.4);
+  // Past the eight-minute mark extra actors arrive alongside each wave, so no defence holds forever.
+  for (let extra = Math.floor(Math.max(0, intensity - 6) / 2); extra > 0; extra--) {
+    spawnThreat(g, m, { at: g.time, profile: rngPick(g, pool), entry: rngPick(g, topo.entries), objectives: [{ node: rngPick(g, topo.controllers), action: "manipulate" }] });
+  }
+  const gap = Math.max(3.5, 24 - intensity * 2.4) * (0.8 + rngNext(g) * 0.4);
   g.nextEndlessWave = g.time + gap;
 }
 
@@ -1006,8 +1017,21 @@ export function step(g: GameState, m: MissionDef): void {
   while (g.waveIndex < m.waves.length && m.waves[g.waveIndex].at <= g.time) spawnThreat(g, m, m.waves[g.waveIndex++]);
   if (m.endless && g.time >= g.nextEndlessWave) endlessWave(g, m);
 
+  // External uplinks are how the site talks to its operators and vendors. They can be cut
+  // to buy time, but not left dark: operations restore them automatically.
+  for (const id of topo.entries) {
+    const n = g.nodes[id];
+    if (n.isolated && g.time - n.isolatedAt >= TIMES.uplinkIsolation) {
+      n.isolated = false;
+      emit(g, { type: "reconnect", node: id });
+      alert(g, "info", "Uplink restored", `${topo.node[id].name} was brought back online by operations. External links cannot stay isolated.`, { node: id });
+    }
+  }
+
   stepJobs(g, m, dt);
-  for (const t of g.threats) stepThreat(g, m, t, dt);
+  // Endless: adversaries work faster every minute, so the night always ends eventually.
+  const threatDt = m.endless ? dt * (1 + (g.time / 60) * 0.18) : dt;
+  for (const t of g.threats) stepThreat(g, m, t, threatDt);
   stepDetection(g, m, dt);
   stepPhysical(g, m, dt);
 

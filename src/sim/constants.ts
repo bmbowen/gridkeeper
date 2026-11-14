@@ -22,11 +22,15 @@ export const TIMES = {
   blind: 25,
   autoReclose: 8,
   honeypotDelay: 12,
+  /** External uplinks cannot stay cut: operations restore them after this long. */
+  uplinkIsolation: 25,
 } as const;
 
 /** Income lost per isolated non-controller node (operators lose a workstation or data source). */
 export const ISOLATION_OPS_COST = 0.1;
 export const MAX_OPS_PENALTY = 0.6;
+/** Condition lost per second by equipment running in local manual (no supervisory control). */
+export const LOCAL_WEAR = 0.35;
 
 export const BASE_MODS: Mods = {
   sensorRange: 0,

@@ -151,3 +151,24 @@ test("pause menu, speed and settings controls work and persist", async ({ page }
   expect(s.quality).toBe("low");
   expect(s.reducedMotion).toBe(true);
 });
+
+test("every campaign mission and endless mode load, render and simulate without errors", async ({ page }) => {
+  const errors = await boot(page, { skipTutorial: true });
+  const ids: string[] = await page.evaluate(() => window.__gridkeeper.campaign.map((m: { id: string }) => m.id));
+  expect(ids).toHaveLength(5);
+  for (const id of [...ids, "endless"]) {
+    await enterMission(page, id);
+    await page.getByTestId("view-cyber").click();
+    await page.getByTestId("btn-golive").click();
+    // Step the simulation directly so this does not depend on the frame rate of the test machine.
+    await page.evaluate(`(() => { const s = ${G}; s.setSpeed(3); for (let i = 0; i < 160; i++) s.advance(0.25); })()`);
+    await page.waitForTimeout(1200);
+    const t = await page.evaluate(`${G}.game.time`);
+    expect(t as number).toBeGreaterThan(100);
+    await expect(page.locator("canvas")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.getByTestId("btn-quit").click();
+    await expect(page.getByTestId("mission-map")).toBeVisible();
+  }
+  expect(errors).toEqual([]);
+});

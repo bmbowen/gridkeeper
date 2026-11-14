@@ -261,3 +261,20 @@ describe("endless mode", () => {
     expect(a.phase === "running" || a.phase === "lost").toBe(true);
   });
 });
+
+describe("external uplinks", () => {
+  it("cannot be left isolated: operations restore them", () => {
+    const m = fixture([{ at: 1, profile: "scanner", entry: "gw", objectives: [{ node: "plcA", action: "manipulate" }] }]);
+    const g = createGame(m);
+    command(g, m, { type: "start" });
+    run(g, m, 2);
+    command(g, m, { type: "isolate", node: "gw" });
+    run(g, m, 20);
+    expect(g.nodes.gw.isolated).toBe(true);
+    expect(g.nodes.sw.compromised).toBe(false);
+    run(g, m, 10);
+    expect(g.nodes.gw.isolated).toBe(false);
+    run(g, m, 60);
+    expect(g.nodes.sw.compromised).toBe(true);
+  });
+});

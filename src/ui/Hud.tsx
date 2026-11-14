@@ -310,7 +310,8 @@ function NodeInspector({ g, m, node }: { g: GameState; m: MissionDef; node: Node
           {why}
         </div>
       </div>
-      {!n.isolated && controls.length > 0 && <p className="muted" style={{ fontSize: 12.5 }}>Isolating drops its equipment to local manual control (reduced output).</p>}
+      {node.entry && <p className="muted" style={{ fontSize: 12.5 }}>External uplink: isolation only holds for 25 s before operations restore the link.</p>}
+      {!n.isolated && controls.length > 0 && <p className="muted" style={{ fontSize: 12.5 }}>Isolating drops its equipment to local manual: reduced output, and it wears while unsupervised.</p>}
     </div>
   );
 }
