@@ -13,10 +13,10 @@ function run(g: GameState, m: MissionDef, seconds: number, each?: () => void) {
   }
 }
 
-function playBot(m: MissionDef) {
+function playBot(m: MissionDef, skilled = false) {
   const g = createGame(m);
   for (let i = 0; i < 20000 && (g.phase === "prep" || g.phase === "running"); i++) {
-    botStep(g, m);
+    botStep(g, m, { skilled });
     step(g, m);
   }
   return g;
@@ -119,5 +119,10 @@ describe("outcomes", () => {
     const r = summarize(g, m);
     expect(g.phase).toBe("won");
     expect(r.stars).toBeGreaterThanOrEqual(1);
+  });
+
+  it.each(CAMPAIGN.map((m) => [m.id, m] as const))("%s can be three-starred by skilled play (segment, harden, E-stop)", (_id, m) => {
+    const g = playBot(m, true);
+    expect(summarize(g, m).stars).toBe(3);
   });
 });

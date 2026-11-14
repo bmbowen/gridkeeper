@@ -473,6 +473,7 @@ function spawnThreat(g: GameState, m: MissionDef, w: WaveDef) {
     syncGroup: w.syncGroup,
     stagedAt: -1,
     stallTotal: 0,
+    tunnel: false,
   };
   g.threats.push(t);
   g.stats.threatsSpawned++;
@@ -589,13 +590,18 @@ function stepThreat(g: GameState, m: MissionDef, t: ThreatState, dt: number) {
         }
         break;
       }
-      const path = findPath(g, m, t.node, obj.node, prof.credentialed);
+      let path = findPath(g, m, t.node, obj.node, prof.credentialed || t.tunnel);
+      if (!path && !t.tunnel && t.stallTotal >= TIMES.segmentHold && findPath(g, m, t.node, obj.node, true)) {
+        // Held long enough at a policy boundary: it finds an allowed service to ride through.
+        t.tunnel = true;
+        path = findPath(g, m, t.node, obj.node, true);
+      }
       if (!path) {
         t.phase = "stalled";
         t.timer = 2;
         t.stallTotal += 2;
         if (t.stallTotal >= 14) {
-          if (prof.opportunistic && retarget(g, m, t)) break;
+          if (prof.opportunistic && !findPath(g, m, t.node, obj.node, true) && retarget(g, m, t)) break;
           // Give up on an unreachable objective and try the next one.
           if (t.stallTotal >= 30 && t.objIndex < t.objectives.length - 1) {
             t.objIndex++;
@@ -614,7 +620,7 @@ function stepThreat(g: GameState, m: MissionDef, t: ThreatState, dt: number) {
     }
     case "moving": {
       const link = g.links[t.link];
-      if (g.nodes[t.to].isolated || (link.segmented && !prof.credentialed)) {
+      if (g.nodes[t.to].isolated || (link.segmented && !prof.credentialed && !t.tunnel)) {
         // Path closed mid-transit: fall back to where it came from.
         t.phase = "idle";
         t.progress = 0;

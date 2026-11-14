@@ -74,15 +74,24 @@ const start = (m: MissionDef, mods = {}) => {
 describe("segmentation", () => {
   const wave = (profile: WaveDef["profile"]): WaveDef[] => [{ at: 1, profile, entry: "gw", objectives: [{ node: "plcA", action: "manipulate" }] }];
 
-  it("stops an ordinary intruder at a segmented conduit", () => {
+  it("holds an ordinary intruder at a segmented conduit, then it tunnels through slowly and loudly", () => {
     const m = fixture(wave("intruder"));
-    const g = start(m);
-    command(g, m, { type: "segment", link: "gw-sw" });
-    command(g, m, { type: "start" });
-    run(g, m, 120);
-    expect(g.nodes.sw.compromised).toBe(false);
-    expect(g.nodes.plcA.implant).toBe(false);
-    expect(g.opsPenalty).toBeCloseTo(0.2);
+    const reach = (segment: boolean) => {
+      const g = start(m);
+      if (segment) command(g, m, { type: "segment", link: "gw-sw" });
+      command(g, m, { type: "start" });
+      for (let i = 0; i < 4000; i++) {
+        step(g, m);
+        if (g.nodes.sw.compromised) return { t: g.time, g };
+      }
+      return { t: Infinity, g };
+    };
+    const open = reach(false);
+    const seg = reach(true);
+    expect(seg.t).toBeGreaterThan(open.t + 25); // held, then a slow crossing
+    expect(seg.t).toBeLessThan(Infinity); // segmentation is not immunity
+    expect(seg.g.alerts.some((a) => a.title === "Firewall policy alert")).toBe(true); // and the crossing is logged
+    expect(seg.g.opsPenalty).toBeCloseTo(0.2);
   });
 
   it("only slows a credentialed actor, and logs the crossing", () => {

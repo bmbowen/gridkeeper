@@ -24,6 +24,8 @@ export const TIMES = {
   honeypotDelay: 12,
   /** External uplinks cannot stay cut: operations restore them after this long. */
   uplinkIsolation: 25,
+  /** Seconds an ordinary intruder is held at a segmented conduit before it finds a way to tunnel. */
+  segmentHold: 22,
 } as const;
 
 /** Income lost per isolated non-controller node (operators lose a workstation or data source). */

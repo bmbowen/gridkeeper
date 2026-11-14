@@ -122,7 +122,7 @@ export const level4: MissionDef = {
   ],
   tools: ["sensor", "investigate", "isolate", "remediate", "harden", "segment", "setpoint"],
   lose: { productionBelow: 0.3, seconds: 26 },
-  stars: { safety: 85, uptime: 84, containment: 60 },
+  stars: { safety: 85, uptime: 82, containment: 60 },
   achievements: [
     { id: "l4-hands", name: "All Fingers Accounted For", desc: "Finish with safety at 95% or better.", test: (g) => g.safety >= 95 },
     { id: "l4-order", name: "Order Shipped", desc: "Finish with average output at 92% or better.", test: (_g, r) => r.uptime >= 92 },

@@ -347,6 +347,8 @@ export interface ThreatState {
   syncGroup?: string;
   stagedAt: number;
   stallTotal: number;
+  /** Has found an allowed service to tunnel through segmented conduits (slow and logged). */
+  tunnel: boolean;
 }
 
 export interface Job {
