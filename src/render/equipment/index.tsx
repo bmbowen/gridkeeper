@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import type { EquipDef, EquipKind } from "@/sim/types";
 import { Selectable } from "../parts";
 import { Boiler, CoolingPump, CoolingTower, Generator, Turbine } from "./plant";
+import { Compressor, Conveyor, Packer, Press, Robot } from "./factory";
 import { Breaker, FanBank, Feeder, Source, Transformer } from "./substation";
 import { Clarifier, District, Doser, Intake, Pump, Tank, Valve } from "./water";
 
@@ -25,13 +26,22 @@ export const EQUIPMENT: Partial<Record<EquipKind, ComponentType<{ def: EquipDef 
   doser: Doser,
   tank: Tank,
   district: District,
+  robot: Robot,
+  conveyor: Conveyor,
+  press: Press,
+  packer: Packer,
+};
+
+/** Alternative models selected with `visual.model`, for equipment that reuses a generic sim kind. */
+export const MODEL_OVERRIDES: Record<string, ComponentType<{ def: EquipDef }>> = {
+  compressor: Compressor,
 };
 
 export function EquipmentLayer({ equipment }: { equipment: EquipDef[] }) {
   return (
     <>
       {equipment.map((e) => {
-        const Model = EQUIPMENT[e.kind];
+        const Model = MODEL_OVERRIDES[String(e.visual?.model ?? "")] ?? EQUIPMENT[e.kind];
         if (!Model) return null;
         return (
           <group key={e.id} position={e.pos} rotation={[0, e.rot ?? 0, 0]}>

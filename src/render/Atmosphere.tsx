@@ -28,7 +28,7 @@ export const ENV: Record<EnvironmentId, EnvConfig> = {
   desert: { skyTop: "#070b24", skyMid: "#4a2466", skyHorizon: "#ff8648", sunDir: [-0.86, 0.17, -0.42], sunColor: "#ffae6e", sunIntensity: 3.4, sunDisc: 1, hemiSky: "#6f78ff", hemiGround: "#4a2f22", hemiIntensity: 1.0, fog: "#3a2244", fogDensity: 0.005, stars: 0.7, exposure: 1.25 },
   water: { skyTop: "#0c2233", skyMid: "#2f6b7a", skyHorizon: "#bfe6d8", sunDir: [0.6, 0.38, 0.5], sunColor: "#d8f1ea", sunIntensity: 2.4, sunDisc: 0.5, hemiSky: "#8fd0e0", hemiGround: "#22352c", hemiIntensity: 0.9, fog: "#5b8a90", fogDensity: 0.0042, stars: 0, exposure: 1 },
   plant: { skyTop: "#03060f", skyMid: "#0c1630", skyHorizon: "#2b3a70", sunDir: [0.35, 0.5, 0.65], sunColor: "#a9c0ff", sunIntensity: 1.9, sunDisc: 0.35, hemiSky: "#5a74c0", hemiGround: "#241a12", hemiIntensity: 1.05, fog: "#0e1830", fogDensity: 0.0048, stars: 1, exposure: 1.2 },
-  factory: { skyTop: "#05080e", skyMid: "#0a1220", skyHorizon: "#162338", sunDir: [0.3, 0.9, 0.35], sunColor: "#dfe9ff", sunIntensity: 1.9, sunDisc: 0, hemiSky: "#8aa0c8", hemiGround: "#1c2028", hemiIntensity: 0.95, fog: "#0b121c", fogDensity: 0.004, stars: 0, exposure: 1.05 },
+  factory: { skyTop: "#05080e", skyMid: "#0a1220", skyHorizon: "#162338", sunDir: [0.3, 0.9, 0.35], sunColor: "#dfe9ff", sunIntensity: 2.3, sunDisc: 0, hemiSky: "#9db4dc", hemiGround: "#2a3038", hemiIntensity: 1.35, fog: "#0b121c", fogDensity: 0.0032, stars: 0.5, exposure: 1.12 },
   grid: { skyTop: "#020409", skyMid: "#0a1230", skyHorizon: "#2a2a66", sunDir: [-0.4, 0.5, 0.7], sunColor: "#8fa8ff", sunIntensity: 1.3, sunDisc: 0.3, hemiSky: "#3f55a0", hemiGround: "#101018", hemiIntensity: 0.7, fog: "#0a1028", fogDensity: 0.0042, stars: 1, exposure: 1.1 },
 };
 
