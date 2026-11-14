@@ -196,7 +196,7 @@ function LeftColumn({ g, m }: { g: GameState; m: MissionDef }) {
             ))}
             <div className="grp">Equipment</div>
             {m.equipment
-              .filter((e) => e.kind !== "source" || e.controller)
+              .filter((e) => e.kind !== "source" || e.controller || e.sinkWeight)
               .map((e) => (
                 <button key={e.id} className={selected?.id === e.id ? "sel" : ""} onClick={() => pick("equip", e.id, e.pos)} data-testid={`asset-${e.id}`}>
                   <span className="dot" style={{ color: equipDot(g, e.id) }} />

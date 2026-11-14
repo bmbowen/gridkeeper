@@ -15,7 +15,7 @@ const C = {
   red: new THREE.Color(PALETTE.red),
   green: new THREE.Color(PALETTE.green),
   grey: new THREE.Color("#55606e"),
-  dim: new THREE.Color("#3f7396"),
+  dim: new THREE.Color("#5a9cc8"),
   violet: new THREE.Color(PALETTE.violet),
   white: new THREE.Color("#ffffff"),
 };
@@ -125,7 +125,7 @@ function Link({ link, curve }: { link: LinkDef; curve: THREE.QuadraticBezierCurv
     else if (covered) col.copy(C.cyan);
     else {
       col.copy(C.dim);
-      intensity = 1;
+      intensity = 1.25;
     }
     mat.color.copy(col).multiplyScalar(intensity);
     mat.opacity = mix * (cut ? 0.3 : covered || hot ? 0.95 : 0.7);
