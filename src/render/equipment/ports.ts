@@ -26,11 +26,11 @@ export const PORTS: Partial<Record<EquipKind, Port>> = {
   tank: { in: [-3.6, 1.1, 0], out: [3.6, 1.1, 0] },
   district: { in: [-3, 1.1, 0], out: [3, 1.1, 0] },
   // generation
-  boiler: { in: [-3.2, 2, 0], out: [3.2, 5, 0] },
-  turbine: { in: [-4.2, 3, 0], out: [4.2, 2.4, 0] },
-  generator: { in: [-3, 2.4, 0], out: [3, 3.4, 0] },
-  coolingTower: { in: [-5, 1.2, 0], out: [5, 1.2, 0] },
-  coolingPump: { in: [-2, 1.1, 0], out: [1.6, 1.1, 0] },
+  boiler: { in: [-3.2, 2, 0], out: [3.45, 9.5, 0] },
+  turbine: { in: [-4.65, 3, 0], out: [4.2, 2.4, 0] },
+  generator: { in: [-3, 2.4, 0], out: [1, 6.35, 0], spread: 1 },
+  coolingTower: { in: [-7.5, 1.2, 0], out: [7.5, 1.2, 0] },
+  coolingPump: { in: [-2.2, 1.1, 0], out: [1.75, 1.1, 0] },
 };
 
 export function portOf(kind: EquipKind): Port {
