@@ -44,6 +44,18 @@ export default function App() {
     };
   }, []);
 
+  // First visit: respect the operating system's reduced-motion preference.
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("gridkeeper-motion-checked")) {
+        localStorage.setItem("gridkeeper-motion-checked", "1");
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) useSave.getState().setSettings({ reducedMotion: true });
+      }
+    } catch {
+      /* storage unavailable: defaults apply */
+    }
+  }, []);
+
   // Test / debug hook: lets browser tests and the console drive the game.
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__gridkeeper = {
