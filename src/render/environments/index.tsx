@@ -5,6 +5,7 @@ import { Desert } from "./Desert";
 import { Plant } from "./Plant";
 import { Water } from "./Water";
 import { Factory } from "./Factory";
+import { Grid } from "./Grid";
 
 /** Scenery for each environment. Missing entries render nothing (mission not yet built). */
 export const ENVIRONMENTS: Partial<Record<EnvironmentId, ComponentType<{ mission: MissionDef }>>> = {
@@ -12,4 +13,5 @@ export const ENVIRONMENTS: Partial<Record<EnvironmentId, ComponentType<{ mission
   plant: Plant,
   water: Water,
   factory: Factory,
+  grid: Grid,
 };

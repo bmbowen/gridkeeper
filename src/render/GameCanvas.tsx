@@ -63,7 +63,7 @@ function World({ mission, attract }: { mission: MissionDef; attract?: boolean })
       <Atmosphere env={mission.environment} target={mission.camera.target} />
       <CameraRig mission={mission} attract={attract} />
       {Env && <Env mission={mission} />}
-      <EquipmentLayer equipment={mission.equipment} />
+      <EquipmentLayer equipment={mission.equipment} environment={mission.environment} />
       <NodesLayer nodes={mission.nodes} />
       <Flows mission={mission} />
       {!attract && (
