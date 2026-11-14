@@ -63,6 +63,7 @@ function TopBar({ g, m }: { g: GameState; m: MissionDef }) {
         </div>
         <div className="panel gauge" data-testid="gauge-credits">
           <div className="eyebrow">Credits</div>
+          <SpendFloaters g={g} />
           <div className="v" style={{ color: "#ffd98a" }}>
             {Math.floor(g.credits)}
             <small>+{income.toFixed(1)}/s{g.opsPenalty > 0 ? ` (−${Math.round(g.opsPenalty * 100)}%)` : ""}</small>
@@ -405,7 +406,7 @@ function LinkInspector({ g, m, link }: { g: GameState; m: MissionDef; link: Link
         <span className={`chip ${s.segmented ? "violet" : "grey"}`}>{s.segmented ? "Segmented" : "Open"}</span>
       </div>
       <p className="desc">
-        A conduit carries traffic between two zones. Segmenting it enforces a strict allow-list: ordinary intruders cannot cross, and credentialed ones are slowed and logged.
+        A conduit carries traffic between two zones. Segmenting it enforces a strict allow-list: ordinary intruders are held for about 20 s before they find a way to tunnel through, credentialed ones are slowed, and every crossing is logged as an alert.
         {link.opsCost ? ` Restricting this one costs ${Math.round(link.opsCost * 100)}% of income while it stays closed.` : ""}
       </p>
       <div className="actions">
@@ -599,6 +600,43 @@ function PauseMenu({ m }: { m: MissionDef }) {
   );
 }
 
+/** Screen-space mood: red pulse while equipment is hijacked or burning, a cool scan in cyber view. */
+function Mood({ g, m }: { g: GameState; m: MissionDef }) {
+  const view = useGame((s) => s.view);
+  const danger = g.phase === "running" && (Object.values(g.equipment).some((e) => e.manip || e.fire > 0) || g.production < m.lose.productionBelow);
+  const warn = !danger && g.phase === "running" && Object.values(g.nodes).some((n) => n.arming || n.knowledge === "confirmed");
+  return (
+    <>
+      <div className={`mood ${danger ? "danger" : warn ? "warn" : ""}`} aria-hidden />
+      {view === "cyber" && <div className="mood cyber" key="cyber" aria-hidden />}
+    </>
+  );
+}
+
+/** Floating "-60" under the credits gauge whenever credits are spent. */
+function SpendFloaters({ g }: { g: GameState }) {
+  const prev = useRef(g.stats.creditsSpent);
+  const [items, setItems] = useState<{ id: number; amount: number }[]>([]);
+  useEffect(() => {
+    const d = g.stats.creditsSpent - prev.current;
+    prev.current = g.stats.creditsSpent;
+    if (d > 0) {
+      const id = Date.now() + Math.random();
+      setItems((x) => [...x.slice(-3), { id, amount: d }]);
+      setTimeout(() => setItems((x) => x.filter((i) => i.id !== id)), 1400);
+    }
+  });
+  return (
+    <>
+      {items.map((i) => (
+        <span key={i.id} className="floater">
+          −{i.amount}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function Perf() {
   useTick();
   return <div className="perf">{`${viewFx.fps.toFixed(0)} fps\n${viewFx.drawCalls} draws\n${(viewFx.triangles / 1000).toFixed(0)}k tris`}</div>;
@@ -637,6 +675,7 @@ export function Hud() {
   const over = g.phase === "won" || g.phase === "lost";
   return (
     <>
+      <Mood g={g} m={m} />
       <TopBar g={g} m={m} />
       {!over && <LeftColumn g={g} m={m} />}
       {!over && (

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { OrbitControls as OrbitImpl } from "three-stdlib";
 import type { MissionDef } from "@/sim/types";
-import { viewFx } from "@/state/fx";
+import { onFx, viewFx } from "@/state/fx";
 import { useGame } from "@/state/game";
 import { useSave } from "@/state/save";
 
@@ -27,6 +27,16 @@ export function CameraRig({ mission, attract }: { mission: MissionDef; attract?:
   const home = useMemo(() => new THREE.Vector3(...mission.camera.home), [mission]);
   const target = useMemo(() => new THREE.Vector3(...mission.camera.target), [mission]);
   const tmp = useMemo(() => new THREE.Vector3(), []);
+  const shakeOffset = useMemo(() => new THREE.Vector3(), []);
+
+  // Heavy physical events kick the camera.
+  useEffect(() => {
+    if (attract) return;
+    const kick: Record<string, number> = { trip: 0.4, fire: 0.8, implant: 0.22, lose: 1, isolate: 0.1 };
+    return onFx((e) => {
+      if (kick[e.type]) viewFx.shake = Math.min(1, viewFx.shake + kick[e.type]);
+    });
+  }, [attract]);
 
   useEffect(() => {
     t.current = 0;
@@ -91,6 +101,9 @@ export function CameraRig({ mission, attract }: { mission: MissionDef; attract?:
       return;
     }
     if (!c) return;
+    // Remove last frame's shake before the controls read the camera.
+    camera.position.sub(shakeOffset);
+    shakeOffset.set(0, 0, 0);
     // Keyboard pan, relative to the camera heading.
     const k = keys.current;
     const fx = (k.KeyD || k.ArrowRight ? 1 : 0) - (k.KeyA || k.ArrowLeft ? 1 : 0);
@@ -135,6 +148,12 @@ export function CameraRig({ mission, attract }: { mission: MissionDef; attract?:
     c.target.z = THREE.MathUtils.clamp(c.target.z, target.z - 60, target.z + 60);
     c.target.y = THREE.MathUtils.clamp(c.target.y, 0, 12);
     c.update();
+    if (viewFx.shake > 0.001 && !reduced) {
+      const amp = viewFx.shake * viewFx.shake * camera.position.distanceTo(c.target) * 0.012;
+      shakeOffset.set((Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp, (Math.random() - 0.5) * amp);
+      camera.position.add(shakeOffset);
+    }
+    viewFx.shake = Math.max(0, viewFx.shake - dt * 1.8);
   });
 
   if (attract) return null;

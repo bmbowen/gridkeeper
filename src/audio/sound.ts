@@ -11,6 +11,21 @@ let ambBus: GainNode | null = null;
 let humGain: GainNode | null = null;
 let alarmGain: GainNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
+let musicGain: GainNode | null = null;
+let musicFilter: BiquadFilterNode | null = null;
+let pulseGain: GainNode | null = null;
+let pulseOsc: OscillatorNode | null = null;
+let voices: OscillatorNode[] = [];
+let chordTimer: ReturnType<typeof setInterval> | null = null;
+let chordIndex = 0;
+
+/** Slow minor progression (A minor 9, F major 7, C major 7, G sus). Four voices, Hz. */
+const CHORDS = [
+  [110, 164.81, 196, 246.94],
+  [87.31, 130.81, 174.61, 220],
+  [130.81, 164.81, 196, 246.94],
+  [98, 146.83, 196, 220],
+];
 
 const vol = { master: 0.7, sfx: 0.8, ambience: 0.5, muted: false };
 
@@ -91,6 +106,51 @@ export function initAudio(): void {
   a.start();
   alfo.start();
 
+  // Generative score: a slow pad that drifts through a progression, with a low pulse that
+  // rises as the situation gets worse. No samples, no loops to tire of.
+  musicGain = ctx.createGain();
+  musicGain.gain.value = 0;
+  musicFilter = ctx.createBiquadFilter();
+  musicFilter.type = "lowpass";
+  musicFilter.frequency.value = 500;
+  musicFilter.Q.value = 0.7;
+  musicFilter.connect(musicGain).connect(ambBus);
+  voices = CHORDS[0].flatMap((f, i) =>
+    [-4, 4].map((detune) => {
+      const o = ctx!.createOscillator();
+      o.type = i === 0 ? "triangle" : "sawtooth";
+      o.frequency.value = f;
+      o.detune.value = detune + i * 2;
+      const vg = ctx!.createGain();
+      vg.gain.value = i === 0 ? 0.09 : 0.035;
+      o.connect(vg).connect(musicFilter!);
+      o.start();
+      return o;
+    }),
+  );
+  pulseOsc = ctx.createOscillator();
+  pulseOsc.type = "sine";
+  pulseOsc.frequency.value = 55;
+  pulseGain = ctx.createGain();
+  pulseGain.gain.value = 0;
+  const pulseLfo = ctx.createOscillator();
+  pulseLfo.type = "sine";
+  pulseLfo.frequency.value = 2.2;
+  const pulseDepth = ctx.createGain();
+  pulseDepth.gain.value = 0;
+  pulseLfo.connect(pulseDepth).connect(pulseGain.gain);
+  pulseLfo.start();
+  pulseOsc.connect(pulseGain).connect(ambBus);
+  pulseOsc.start();
+  (pulseGain as GainNode & { depth?: GainNode }).depth = pulseDepth;
+  chordTimer = setInterval(() => {
+    if (!ctx) return;
+    chordIndex = (chordIndex + 1) % CHORDS.length;
+    const chord = CHORDS[chordIndex];
+    voices.forEach((o, k) => o.frequency.setTargetAtTime(chord[Math.floor(k / 2)], ctx!.currentTime, 1.4));
+    pulseOsc?.frequency.setTargetAtTime(chord[0] / 2, ctx.currentTime, 0.6);
+  }, 9000);
+
   applyVolume();
 }
 
@@ -111,9 +171,20 @@ export function setVolumes(v: Partial<typeof vol>): void {
   applyVolume();
 }
 
-/** Called every UI tick with the state of the world so loops track it. */
-export function setAmbience(production: number, alarm: boolean, active: boolean): void {
+/**
+ * Called every UI tick with the state of the world so loops track it.
+ * `tension` 0..1 drives the score: calm pad → brighter, with a rising pulse.
+ */
+export function setAmbience(production: number, alarm: boolean, active: boolean, tension = 0.15): void {
   if (!ctx || !humGain || !alarmGain) return;
+  if (musicGain && musicFilter && pulseGain) {
+    const t = Math.max(0, Math.min(1, tension));
+    musicGain.gain.setTargetAtTime(0.5 + t * 0.35, ctx.currentTime, 1.2);
+    musicFilter.frequency.setTargetAtTime(380 + t * 1500, ctx.currentTime, 1.5);
+    const depth = (pulseGain as GainNode & { depth?: GainNode }).depth;
+    pulseGain.gain.setTargetAtTime(t > 0.3 ? t * 0.16 : 0, ctx.currentTime, 0.8);
+    depth?.gain.setTargetAtTime(t > 0.3 ? t * 0.14 : 0, ctx.currentTime, 0.8);
+  }
   humGain.gain.setTargetAtTime(active ? 0.25 + production * 0.75 : 0.15, ctx.currentTime, 0.4);
   alarmGain.gain.setTargetAtTime(alarm && active ? 1 : 0, ctx.currentTime, 0.15);
 }

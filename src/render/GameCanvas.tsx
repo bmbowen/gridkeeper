@@ -1,7 +1,7 @@
 "use client";
 import { PerformanceMonitor } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, N8AO, Vignette } from "@react-three/postprocessing";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { MissionDef } from "@/sim/types";
@@ -105,9 +105,17 @@ export default function GameCanvas({ mission, attract }: { mission: MissionDef; 
         />
       )}
       <World mission={mission} attract={attract} />
-      {quality !== "low" && (
-        <EffectComposer multisampling={quality === "high" ? 4 : 0}>
-          <Bloom mipmapBlur intensity={quality === "high" ? 0.9 : 0.75} luminanceThreshold={1} luminanceSmoothing={0.2} radius={0.72} />
+      {quality === "medium" && (
+        <EffectComposer multisampling={0}>
+          <Bloom mipmapBlur intensity={0.75} luminanceThreshold={1} luminanceSmoothing={0.2} radius={0.72} />
+          <Vignette eskil={false} offset={0.22} darkness={0.72} />
+        </EffectComposer>
+      )}
+      {quality === "high" && (
+        <EffectComposer multisampling={0}>
+          {/* Ambient occlusion grounds equipment on its pads and adds depth between machines. */}
+          <N8AO aoRadius={2.6} distanceFalloff={1.2} intensity={2.4} quality="medium" halfRes color="#020611" />
+          <Bloom mipmapBlur intensity={0.9} luminanceThreshold={1} luminanceSmoothing={0.2} radius={0.72} />
           <Vignette eskil={false} offset={0.22} darkness={0.72} />
         </EffectComposer>
       )}

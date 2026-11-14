@@ -16,7 +16,7 @@ export const level2: MissionDef = {
   briefing: [
     "Alder Creek draws from the river, settles and disinfects the water, and pumps it up to the tower that pressurizes three districts. Every stage feeds the next one.",
     "Two tanks sit in the chain. They hide an upstream failure for a minute or two, which is long enough to fix it and also long enough to miss it. The morning peak drains them faster.",
-    "You now have two preventive tools. Hardening makes an asset slow to compromise. Segmenting a conduit stops ordinary intruders at a zone boundary, but someone holding valid credentials still gets through, slowly. Both the vendor line and the city network lead here.",
+    "You now have two preventive tools. Hardening makes an asset slow to compromise. Segmenting a conduit holds ordinary intruders at a zone boundary for a while and logs anything that eventually gets across. Someone holding valid credentials is only slowed. Both the vendor line and the city network lead here.",
   ],
   objectives: [
     "Keep water flowing to all three districts until the shift ends",

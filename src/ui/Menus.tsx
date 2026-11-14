@@ -310,7 +310,7 @@ export function SettingsPanel() {
           </label>
           {slider("Master volume", "master")}
           {slider("Effects", "sfx")}
-          {slider("Ambience", "ambience")}
+          {slider("Ambience & music", "ambience")}
           <label className="setting">
             <span>Mute all sound</span>
             <input type="checkbox" checked={settings.muted} onChange={(e) => set({ muted: e.target.checked })} />

@@ -4,7 +4,7 @@
 
 | Area | State |
 | --- | --- |
-| Simulation engine | Deterministic, fixed 10 Hz timestep, seeded, independent of React. 32 Vitest tests. |
+| Simulation engine | Deterministic, fixed 10 Hz timestep, seeded, independent of React. 37 Vitest tests. |
 | Level 1 · First Contact | Desert substation at dusk. Guided 13-step tutorial. Played start to finish through the UI by the browser tests. |
 | Level 2 · Pressure Drop | Water treatment plant. Adds hardening, segmentation, buffer tanks, demand peaks. |
 | Level 3 · Heat Signature | Three-unit power station at night. Adds throttling against thermal margin. |
@@ -13,24 +13,25 @@
 | Endless mode · Long Night | Unlocks after the campaign. Seeded, escalating waves on the Level 5 map. |
 | Progression | Mission map, stars (safety / uptime / containment), achievements, 8 persistent upgrades, local save. |
 | UX | Briefings, cinematic intros, pause / restart / speed, inspector, actionable alerts, tooltips, results breakdown, settings. |
-| Audio | Synthesized effects, ambience and alarm with volume controls. |
-| Graphics | Physical and cyber views, bloom, shadows, particles, three quality presets, adaptive quality, performance overlay. |
+| Audio | Synthesized effects, ambience, alarm, and a generative score whose tension follows the situation. Volume controls. |
+| Graphics | Physical and cyber views, bloom, shadows, particles, ambient occlusion on High, three quality presets, adaptive quality, performance overlay. |
+| Game feel | Camera shake on trips and fires, red screen pulse while equipment is hijacked, cyber-view scan transition, spend floaters, event bursts, equipment call-outs. |
 | Accessibility | Keyboard shortcuts for every action, asset list as an alternative to 3D picking, reduced motion, responsive layout. |
 | Tests | 7 Playwright tests against the production build, including every mission loading and simulating without console errors. |
 
-Every mission is checked automatically for three things: its data is consistent, doing nothing loses it, and a scripted defender that only uses player-visible information wins it.
+Every mission is checked automatically for four things: its data is consistent, doing nothing loses it, a basic scripted defender wins it, and a skilled scripted defender (segments, hardens, E-stops) earns three stars. Both defenders only use player-visible information.
 
 ## Verified by automation, not by a human playthrough
 
-- Levels 2–5 are proven winnable by the scripted defender (1–2 stars) and were inspected in screenshots in both views and during incidents. Nobody has hand-played them to three stars, so the difficulty curve is tuned by simulation rather than by feel.
+- Levels 2–5 are proven winnable (1–2 stars basic, 3 stars skilled) by scripted defenders with instant reactions, and were inspected in screenshots in both views and during incidents. Nobody has hand-played them, so the difficulty curve is tuned by simulation rather than by feel. A human with slower reactions will find them harder than the scripts do.
 - Frame rate was only measured under software rendering in a headless browser. Performance on real GPUs is untested.
-- Audio was written and wired but could not be listened to in the build environment.
+- Audio, including the score, was written and wired but could not be listened to in the build environment. Mix levels are a first guess.
 - Touch input relies on the standard orbit controls and was not tested on a device.
 
 ## Known weak spots
 
 - **Level 4 draw calls** are the highest of any level (about 1,260 at close zoom). Robots and racking are candidates for instancing.
-- **Segmentation is strong.** Segmenting the right conduit before going live stops every non-credentialed threat on that path for the whole shift. Credentialed actors and income costs are the counterweight; this may want a further pass.
+- **Segmentation** holds an ordinary intruder for about 20 s, then it tunnels through slowly and raises an alert. With instant reactions that alert is always enough to catch it; whether it feels fair to a human is untested.
 - **Sensors flag the asset an intruder just left**, which can mark an unsensored neighbour as suspicious. It is consistent, but can surprise.
 - **Level 5 framing.** The site is wide, so some assets sit under HUD panels at the home camera until you pan.
 - **Level 2 river** is a flat surface above the ground plane rather than a cut channel.
@@ -39,8 +40,7 @@ Every mission is checked automatically for three things: its data is consistent,
 
 ## Not built
 
-- Real audio assets or music (everything is synthesized).
-- Ambient occlusion (bloom and vignette only).
+- Recorded audio or composed music (everything is synthesized).
 - Replay recording and playback UI (the engine supports it; nothing exposes it).
 - Cloud saves, accounts or any backend.
 - Localization and key rebinding.

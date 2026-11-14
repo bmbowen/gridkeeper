@@ -34,7 +34,18 @@ export default function App() {
       const s = useGame.getState();
       const g = s.game;
       const active = !!g && s.screen === "game" && g.phase === "running" && !s.paused && !s.menuOpen;
-      setAmbience(g?.production ?? 1, !!g && Object.values(g.equipment).some((e) => e.manip || e.fire > 0), active || s.screen !== "game");
+      const alarm = !!g && Object.values(g.equipment).some((e) => e.manip || e.fire > 0);
+      // Score tension: quiet in prep, rising with suspicion, confirmed intrusions, and physical impact.
+      let tension = 0.15;
+      if (g && s.screen === "game" && g.phase === "running") {
+        const nodes = Object.values(g.nodes);
+        tension = 0.25;
+        if (nodes.some((n) => n.knowledge === "suspicious")) tension = 0.45;
+        if (nodes.some((n) => n.knowledge === "confirmed")) tension = 0.65;
+        if (nodes.some((n) => n.arming)) tension = 0.8;
+        if (alarm || g.production < 0.6) tension = 1;
+      }
+      setAmbience(g?.production ?? 1, alarm, active || s.screen !== "game", tension);
     }, 250);
     return () => {
       window.removeEventListener("pointerdown", wake);

@@ -74,7 +74,7 @@ export const PROFILES: Record<ThreatProfileId, ThreatProfile> = {
   engineer: {
     id: "engineer",
     name: "Credentialed Operator",
-    summary: "Works with stolen engineering credentials. Segmentation slows it but does not stop it.",
+    summary: "Works with stolen engineering credentials. Segmentation barely holds it: it crosses at once, only slower.",
     moveTime: 4.5,
     compromiseTime: 5.5,
     stealth: 5,

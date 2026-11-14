@@ -45,7 +45,7 @@ Later missions add hardening, network segmentation, operator setpoints (throttle
 ### The rules the simulation follows
 
 - **Passive sensors only observe.** They never slow or stop an intruder. Without them you only learn about an attack when equipment misbehaves.
-- **Segmentation constrains communication.** A segmented conduit stops ordinary intruders and slows credentialed ones, and some conduits cost income while closed.
+- **Segmentation constrains communication.** A segmented conduit holds ordinary intruders for a while, slows every crossing and logs it as an alert. It buys time and visibility, not immunity, and some conduits cost income while closed.
 - **Isolation has an operational cost.** Isolated controllers drop their equipment to local manual; isolated workstations cost income.
 - **Defense is limited.** Credits, two analysts and two field crews. You cannot look at everything.
 

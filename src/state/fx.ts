@@ -20,6 +20,8 @@ export const viewFx = {
   /** Camera focus request consumed by the camera rig. */
   focus: null as null | [number, number, number],
   cameraMoved: false,
+  /** Camera shake energy 0..1, added by heavy events and decayed by the camera rig. */
+  shake: 0,
   /** World → screen projection, installed by the canvas (used by tooltips and browser tests). */
   project: null as null | ((p: [number, number, number]) => [number, number]),
   fps: 60,
