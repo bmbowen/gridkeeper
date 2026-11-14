@@ -1,0 +1,105 @@
+import type { MissionDef } from "../types";
+
+/**
+ * LEVEL 1 — FIRST CONTACT
+ * Copper Mesa 230/34.5 kV substation, desert, dusk.
+ * Teaches: cyber view, passive sensors, investigate → isolate → remediate → reconnect.
+ */
+export const level1: MissionDef = {
+  id: "first-contact",
+  index: 1,
+  name: "First Contact",
+  tagline: "Something is knocking on the substation's front door.",
+  location: "Copper Mesa Substation · Sonoran Desert",
+  environment: "desert",
+  teaches: "Network visibility · Passive sensors · Isolation",
+  briefing: [
+    "Copper Mesa steps 230 kV transmission down to feed a desert town, the county hospital and the well field that keeps both of them in water.",
+    "The utility's SOC has seen scanning against remote-access gateways across the region tonight. Nobody is watching this site's control network. You are.",
+    "Passive sensors show you what is moving on the wire. They do not stop anything. When you find an intruder: isolate the asset, clean it, and reconnect it before the lights go out.",
+  ],
+  objectives: [
+    "Keep the three feeders energized until the shift ends",
+    "Deploy passive sensors to see the control network",
+    "Contain every intrusion before it trips equipment",
+  ],
+  seed: 0x51c0ffee,
+  startCredits: 200,
+  incomeRate: 2.2,
+  duration: 255,
+  unit: "MW",
+  nominal: 84,
+  tutorial: true,
+  zones: [
+    { id: "ext", name: "External Networks", tag: "UNTRUSTED", color: "#ff6b5e", rect: [-22, 29, 26, 37] },
+    { id: "ctrl", name: "Control House", tag: "STATION LAN", color: "#38d6ff", rect: [-8, 18, 16, 28] },
+    { id: "yard", name: "Switchyard", tag: "FIELD DEVICES", color: "#7dffb0", rect: [-22, -19, 22, 16] },
+  ],
+  nodes: [
+    { id: "wan", name: "Utility WAN Uplink", kind: "gateway", zone: "ext", pos: [-14, 0, 33], entry: true, desc: "Microwave backhaul to the utility control center. The front door." },
+    { id: "vpn", name: "Vendor Remote Access", kind: "gateway", zone: "ext", pos: [20, 0, 33], entry: true, desc: "Cellular modem the relay vendor uses for maintenance. The side door." },
+    { id: "fw", name: "Station Router", kind: "firewall", zone: "ctrl", pos: [-4, 0, 23], desc: "Routes control-center traffic into the station LAN." },
+    { id: "sw", name: "Station Switch", kind: "switch", zone: "ctrl", pos: [1, 0, 23], desc: "Core of the station LAN. Everything talks through here, which makes it the best place to listen." },
+    { id: "hmi", name: "Operator HMI", kind: "hmi", zone: "ctrl", pos: [6, 0, 23], desc: "Local operator screen for the yard." },
+    { id: "ews", name: "Engineering Workstation", kind: "ews", zone: "ctrl", pos: [11, 0, 23], desc: "Holds relay settings and RTU logic. Trusted by every field device." },
+    { id: "fsw", name: "Yard Switch", kind: "switch", zone: "yard", pos: [5, 0, 6], desc: "Marshalling kiosk linking the control house to the bay controllers." },
+    { id: "rtuA", name: "RTU-A · Line Bay", kind: "rtu", zone: "yard", pos: [-16, 0, 0], desc: "Controls the 230 kV line breakers." },
+    { id: "rtuB", name: "RTU-B · Transformer Bay", kind: "rtu", zone: "yard", pos: [-4, 0, 0], desc: "Controls transformer cooling. Lose the fans and the transformers cook." },
+    { id: "rtuC", name: "RTU-C · Feeder Bay", kind: "rtu", zone: "yard", pos: [15, 0, -6], desc: "Controls the 34.5 kV feeder breakers to town." },
+  ],
+  links: [
+    { id: "wan-fw", a: "wan", b: "fw", conduit: true },
+    { id: "fw-sw", a: "fw", b: "sw" },
+    { id: "sw-hmi", a: "sw", b: "hmi" },
+    { id: "hmi-ews", a: "hmi", b: "ews" },
+    { id: "vpn-ews", a: "vpn", b: "ews", conduit: true, opsCost: 0.05 },
+    { id: "sw-fsw", a: "sw", b: "fsw", conduit: true },
+    { id: "ews-fsw", a: "ews", b: "fsw", conduit: true },
+    { id: "fsw-rtuA", a: "fsw", b: "rtuA" },
+    { id: "fsw-rtuB", a: "fsw", b: "rtuB" },
+    { id: "fsw-rtuC", a: "fsw", b: "rtuC" },
+  ],
+  equipment: [
+    { id: "line", name: "230 kV Incoming Line", kind: "source", pos: [-30, 0, 0], desc: "Transmission feed from the regional grid." },
+    { id: "brkL1", name: "Line Breaker 52-L1", kind: "breaker", pos: [-16, 0, -9], controller: "rtuA", inputs: ["line"], visual: { hv: true } },
+    { id: "brkL2", name: "Line Breaker 52-L2", kind: "breaker", pos: [-16, 0, 9], controller: "rtuA", inputs: ["line"], visual: { hv: true } },
+    { id: "fan1", name: "T1 Cooling Bank", kind: "fan", pos: [-4, 0, -13], controller: "rtuB", manualFactor: 1 },
+    { id: "fan2", name: "T2 Cooling Bank", kind: "fan", pos: [-4, 0, 13], rot: Math.PI, controller: "rtuB", manualFactor: 1 },
+    { id: "t1", name: "Transformer T1", kind: "transformer", pos: [-4, 0, -9], inputs: ["brkL1"], cooledBy: ["fan1"], heatRate: 0.035, desc: "230/34.5 kV, 50 MVA. Needs forced cooling at this load." },
+    { id: "t2", name: "Transformer T2", kind: "transformer", pos: [-4, 0, 9], inputs: ["brkL2"], cooledBy: ["fan2"], heatRate: 0.035, desc: "230/34.5 kV, 50 MVA. Needs forced cooling at this load." },
+    { id: "brkF1", name: "Feeder Breaker 52-F1", kind: "breaker", pos: [9, 0, -12], controller: "rtuC", inputs: ["t1"] },
+    { id: "brkF2", name: "Feeder Breaker 52-F2", kind: "breaker", pos: [9, 0, 0], controller: "rtuC", inputs: ["t1", "t2"], inputMode: "any" },
+    { id: "brkF3", name: "Feeder Breaker 52-F3", kind: "breaker", pos: [9, 0, 12], controller: "rtuC", inputs: ["t2"] },
+    { id: "fd1", name: "Mesa Ridge Feeder", kind: "feeder", pos: [22, 0, -12], inputs: ["brkF1"], sinkWeight: 1, desc: "Residential load: 2,400 homes.", visual: { label: "MESA RIDGE" } },
+    { id: "fd2", name: "County Hospital Feeder", kind: "feeder", pos: [22, 0, 0], inputs: ["brkF2"], sinkWeight: 1.4, desc: "Critical load. Fed from either transformer.", visual: { label: "HOSPITAL" } },
+    { id: "fd3", name: "Well Field Feeder", kind: "feeder", pos: [22, 0, 12], inputs: ["brkF3"], sinkWeight: 1, desc: "Municipal water pumps.", visual: { label: "WELL FIELD" } },
+  ],
+  waves: [
+    { at: 16, profile: "scanner", entry: "wan", objectives: [{ node: "rtuC", action: "manipulate" }], label: "Scanning detected on the WAN uplink" },
+    { at: 92, profile: "intruder", entry: "vpn", objectives: [{ node: "rtuB", action: "manipulate" }], label: "Vendor modem session at an odd hour" },
+    { at: 150, profile: "scanner", entry: "wan", objectives: [{ node: "rtuA", action: "manipulate" }], label: "Second probe from the WAN" },
+    { at: 168, profile: "intruder", entry: "vpn", objectives: [{ node: "rtuC", action: "manipulate" }] },
+  ],
+  events: [
+    { at: 60, type: "falseAlarm", node: "hmi" },
+    { at: 130, type: "weather", value: "wind", text: "Evening wind is picking up across the mesa." },
+  ],
+  tools: ["sensor", "investigate", "isolate", "remediate"],
+  lose: { productionBelow: 0.4, seconds: 20 },
+  stars: { safety: 90, uptime: 92, containment: 75 },
+  achievements: [
+    { id: "l1-lights", name: "Not a Flicker", desc: "Finish without a single breaker trip.", test: (g) => g.stats.trips === 0 },
+    { id: "l1-eyes", name: "Eyes Everywhere", desc: "Deploy at least 5 passive sensors.", test: (g) => g.stats.sensorsPlaced >= 5 },
+  ],
+  camera: {
+    target: [9, 0, 2],
+    home: [36, 33, 96],
+    intro: [
+      [-96, 10, -30],
+      [-52, 9, 34],
+      [-12, 16, 66],
+      [36, 33, 96],
+    ],
+  },
+  map: [0.2, 0.62],
+};
