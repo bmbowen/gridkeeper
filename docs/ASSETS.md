@@ -1,6 +1,6 @@
 # Asset provenance and licensing
 
-GRIDKEEPER ships no downloaded models, textures, images or audio files.
+SETPOINT ships no downloaded models, textures, images or audio files.
 
 | Asset | Source | License |
 | --- | --- | --- |

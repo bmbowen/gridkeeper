@@ -1,4 +1,4 @@
-# GRIDKEEPER
+# SETPOINT
 
 **Keep the lights on.** A browser-based 3D strategy game about defending industrial control systems.
 

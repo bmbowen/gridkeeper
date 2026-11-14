@@ -1,5 +1,5 @@
 /**
- * GRIDKEEPER simulation types.
+ * SETPOINT simulation types.
  * Everything in src/sim is plain TypeScript with no React / DOM / three.js imports,
  * so the simulation can be tested, replayed and run headless.
  */

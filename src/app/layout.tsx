@@ -7,7 +7,7 @@ import "@fontsource/jetbrains-mono/700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GRIDKEEPER — Keep the lights on",
+  title: "SETPOINT — Keep the lights on",
   description: "A 3D industrial cybersecurity strategy game. Defend substations, water plants and power grids against simulated cyber threats.",
 };
 

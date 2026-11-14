@@ -51,6 +51,16 @@ const defaultSettings: Settings = {
   showPerf: false,
 };
 
+// The game was first built under the working title "Gridkeeper". Carry any save across once.
+if (typeof window !== "undefined") {
+  try {
+    const legacy = localStorage.getItem("gridkeeper-save-v1");
+    if (legacy && !localStorage.getItem("setpoint-save-v1")) localStorage.setItem("setpoint-save-v1", legacy);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 export const useSave = create<SaveState>()(
   persist(
     (set, get) => ({
@@ -92,7 +102,7 @@ export const useSave = create<SaveState>()(
       setTutorialDone: () => set({ tutorialDone: true }),
       reset: () => set({ records: {}, achievements: [], upgrades: [], endlessBest: 0, tutorialDone: false }),
     }),
-    { name: "gridkeeper-save-v1", version: 1 },
+    { name: "setpoint-save-v1", version: 1 },
   ),
 );
 

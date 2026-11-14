@@ -3,11 +3,11 @@ import { expect, test, type Page } from "@playwright/test";
 declare global {
   interface Window {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    __gridkeeper: any;
+    __setpoint: any;
   }
 }
 
-const G = "window.__gridkeeper.game.getState()";
+const G = "window.__setpoint.game.getState()";
 
 async function boot(page: Page, opts: { skipTutorial?: boolean } = {}) {
   const errors: string[] = [];
@@ -16,8 +16,8 @@ async function boot(page: Page, opts: { skipTutorial?: boolean } = {}) {
     if (m.type() === "error") errors.push(m.text());
   });
   await page.goto("/");
-  await page.waitForFunction(() => !!window.__gridkeeper);
-  if (opts.skipTutorial) await page.evaluate(() => window.__gridkeeper.save.getState().setTutorialDone());
+  await page.waitForFunction(() => !!window.__setpoint);
+  if (opts.skipTutorial) await page.evaluate(() => window.__setpoint.save.getState().setTutorialDone());
   return errors;
 }
 
@@ -80,12 +80,12 @@ test("tutorial: sensors, go live, investigate, isolate, remediate, reconnect thr
 test("3D picking: clicking an asset in the scene selects it", async ({ page }) => {
   await boot(page, { skipTutorial: true });
   await enterMission(page);
-  await page.waitForFunction(() => !!window.__gridkeeper.project([0, 0, 0]));
+  await page.waitForFunction(() => !!window.__setpoint.project([0, 0, 0]));
   await page.waitForTimeout(800);
   const pos = await page.evaluate(() => {
-    const m = window.__gridkeeper.game.getState().mission;
+    const m = window.__setpoint.game.getState().mission;
     const e = m.equipment.find((x: { id: string }) => x.id === "t1");
-    return window.__gridkeeper.project([e.pos[0], e.pos[1] + 2.2, e.pos[2]]);
+    return window.__setpoint.project([e.pos[0], e.pos[1] + 2.2, e.pos[2]]);
   });
   await page.mouse.move(pos[0], pos[1]);
   await page.mouse.click(pos[0], pos[1]);
@@ -110,9 +110,9 @@ test("a defended mission is won, scored, saved and unlocks progress", async ({ p
   // Drive the scripted reference defender through the same command interface the UI uses.
   await page.evaluate(() => {
     const id = setInterval(() => {
-      const s = window.__gridkeeper.game.getState();
+      const s = window.__setpoint.game.getState();
       if (!s.game || s.game.phase === "won" || s.game.phase === "lost") return clearInterval(id);
-      window.__gridkeeper.bot();
+      window.__setpoint.bot();
     }, 50);
   });
   await expect(page.getByTestId("result-title")).toHaveText("GRID SECURED", { timeout: 170_000 });
@@ -121,8 +121,8 @@ test("a defended mission is won, scored, saved and unlocks progress", async ({ p
   await page.getByTestId("btn-to-map").click();
   await expect(page.getByTestId("mission-map")).toBeVisible();
   await page.reload();
-  await page.waitForFunction(() => !!window.__gridkeeper);
-  const saved = await page.evaluate(() => window.__gridkeeper.save.getState().records["first-contact"]?.stars);
+  await page.waitForFunction(() => !!window.__setpoint);
+  const saved = await page.evaluate(() => window.__setpoint.save.getState().records["first-contact"]?.stars);
   expect(saved).toBe(stars);
 });
 
@@ -146,15 +146,15 @@ test("pause menu, speed and settings controls work and persist", async ({ page }
   await page.getByTestId("btn-quit").click();
   await expect(page.getByTestId("mission-map")).toBeVisible();
   await page.reload();
-  await page.waitForFunction(() => !!window.__gridkeeper);
-  const s = await page.evaluate(() => window.__gridkeeper.save.getState().settings);
+  await page.waitForFunction(() => !!window.__setpoint);
+  const s = await page.evaluate(() => window.__setpoint.save.getState().settings);
   expect(s.quality).toBe("low");
   expect(s.reducedMotion).toBe(true);
 });
 
 test("every campaign mission and endless mode load, render and simulate without errors", async ({ page }) => {
   const errors = await boot(page, { skipTutorial: true });
-  const ids: string[] = await page.evaluate(() => window.__gridkeeper.campaign.map((m: { id: string }) => m.id));
+  const ids: string[] = await page.evaluate(() => window.__setpoint.campaign.map((m: { id: string }) => m.id));
   expect(ids).toHaveLength(5);
   for (const id of [...ids, "endless"]) {
     await enterMission(page, id);
