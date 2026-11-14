@@ -641,12 +641,15 @@ function stepThreat(g: GameState, m: MissionDef, t: ThreatState, dt: number) {
           if (o.phase === "staged") {
             o.phase = "arming";
             o.progress = 0;
+            // Mark the release tick so every member starts its countdown on the next step together.
+            o.stagedAt = g.time;
           }
         }
       }
       break;
     }
     case "arming":
+      if (t.syncGroup && t.stagedAt === g.time) break;
       if (node.implant) {
         t.phase = "idle";
         t.objIndex++;

@@ -14,13 +14,25 @@ import { CyberOverlay } from "./CyberOverlay";
 import { ENVIRONMENTS } from "./environments";
 import { EquipmentLayer } from "./equipment";
 import { Flows } from "./Flows";
-import { EventBursts, SelectionMarkers } from "./Fx";
+import { EquipBadges, EventBursts, SelectionMarkers } from "./Fx";
 import { NodesLayer } from "./nodes";
 
 /** Steps the simulation from the render loop and eases shared view values. */
 function Driver({ attract }: { attract?: boolean }) {
   const gl = useThree((s) => s.gl);
+  const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
   const frames = useRef({ n: 0, t: 0 });
+  useEffect(() => {
+    const v = new THREE.Vector3();
+    viewFx.project = (p) => {
+      v.set(p[0], p[1], p[2]).project(camera);
+      return [((v.x + 1) / 2) * size.width, ((1 - v.y) / 2) * size.height];
+    };
+    return () => {
+      viewFx.project = null;
+    };
+  }, [camera, size]);
   useFrame((_, dt) => {
     const st = useGame.getState();
     if (!attract) st.advance(dt);
@@ -58,6 +70,7 @@ function World({ mission, attract }: { mission: MissionDef; attract?: boolean })
         <>
           <CyberOverlay mission={mission} />
           <EventBursts mission={mission} />
+          <EquipBadges mission={mission} />
           <SelectionMarkers />
         </>
       )}

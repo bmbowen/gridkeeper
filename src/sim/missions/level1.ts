@@ -70,9 +70,9 @@ export const level1: MissionDef = {
     { id: "brkF1", name: "Feeder Breaker 52-F1", kind: "breaker", pos: [9, 0, -12], controller: "rtuC", inputs: ["t1"] },
     { id: "brkF2", name: "Feeder Breaker 52-F2", kind: "breaker", pos: [9, 0, 0], controller: "rtuC", inputs: ["t1", "t2"], inputMode: "any" },
     { id: "brkF3", name: "Feeder Breaker 52-F3", kind: "breaker", pos: [9, 0, 12], controller: "rtuC", inputs: ["t2"] },
-    { id: "fd1", name: "Mesa Ridge Feeder", kind: "feeder", pos: [22, 0, -12], inputs: ["brkF1"], sinkWeight: 1, desc: "Residential load: 2,400 homes.", visual: { label: "MESA RIDGE" } },
+    { id: "fd1", name: "Mesa Ridge Feeder", kind: "feeder", pos: [22, 0, -12], inputs: ["brkF1"], sinkWeight: 1, desc: "Residential load: 2,400 homes.", visual: { label: "MESA RIDGE", dz: -17 } },
     { id: "fd2", name: "County Hospital Feeder", kind: "feeder", pos: [22, 0, 0], inputs: ["brkF2"], sinkWeight: 1.4, desc: "Critical load. Fed from either transformer.", visual: { label: "HOSPITAL" } },
-    { id: "fd3", name: "Well Field Feeder", kind: "feeder", pos: [22, 0, 12], inputs: ["brkF3"], sinkWeight: 1, desc: "Municipal water pumps.", visual: { label: "WELL FIELD" } },
+    { id: "fd3", name: "Well Field Feeder", kind: "feeder", pos: [22, 0, 12], inputs: ["brkF3"], sinkWeight: 1, desc: "Municipal water pumps.", visual: { label: "WELL FIELD", dz: 17 } },
   ],
   waves: [
     { at: 16, profile: "scanner", entry: "wan", objectives: [{ node: "rtuC", action: "manipulate" }], label: "Scanning detected on the WAN uplink" },
@@ -92,13 +92,13 @@ export const level1: MissionDef = {
     { id: "l1-eyes", name: "Eyes Everywhere", desc: "Deploy at least 5 passive sensors.", test: (g) => g.stats.sensorsPlaced >= 5 },
   ],
   camera: {
-    target: [9, 0, 2],
-    home: [36, 33, 96],
+    target: [12, 3, 0],
+    home: [45, 23, 96],
     intro: [
       [-96, 10, -30],
       [-52, 9, 34],
       [-12, 16, 66],
-      [36, 33, 96],
+      [45, 23, 96],
     ],
   },
   map: [0.2, 0.62],

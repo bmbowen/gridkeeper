@@ -6,7 +6,8 @@ import { topology } from "@/sim/engine";
 import type { MissionDef, SimEvent } from "@/sim/types";
 import { onFx, viewFx } from "@/state/fx";
 import { useGame } from "@/state/game";
-import { NODE_H, PALETTE } from "./util";
+import { Label } from "./parts";
+import { equipState, NODE_H, PALETTE } from "./util";
 
 const RINGS = 14;
 
@@ -180,6 +181,50 @@ export function SelectionMarkers() {
     <>
       <Marker kind="hover" />
       <Marker kind="select" />
+    </>
+  );
+}
+
+/**
+ * Floating call-outs over equipment that needs attention, so trouble in the yard is
+ * readable from any camera distance in the physical view.
+ */
+export function EquipBadges({ mission }: { mission: MissionDef }) {
+  return (
+    <>
+      {mission.equipment.map((e) => {
+        const h = e.kind === "feeder" || e.kind === "source" ? 9.5 : 7.6;
+        const p: [number, number, number] = [e.pos[0], e.pos[1] + h, e.pos[2]];
+        const blink = () => 0.65 + Math.sin(performance.now() / 120) * 0.35;
+        return (
+          <group key={e.id}>
+            <Label text="▲ ABNORMAL COMMANDS" p={p} color="#1a0d00" bg="#ffb020" size={0.8} opacityRef={() => {
+              const s = equipState(e.id);
+              return s && s.arming && !s.manip && !s.tripped ? blink() : 0;
+            }} />
+            <Label text="✖ TRIPPED" p={p} color="#ffffff" bg="#c21f2c" size={0.8} opacityRef={() => {
+              const s = equipState(e.id);
+              return s && s.tripped && s.fire <= 0 ? 0.95 : 0;
+            }} />
+            <Label text="✖ HIJACKED" p={p} color="#ffffff" bg="#c21f2c" size={0.8} opacityRef={() => {
+              const s = equipState(e.id);
+              return s && s.manip && !s.tripped ? blink() : 0;
+            }} />
+            <Label text="▲ OVERHEATING" p={p} color="#1a0d00" bg="#ff7a1a" size={0.8} opacityRef={() => {
+              const s = equipState(e.id);
+              return s && !s.tripped && !s.manip && !s.arming && s.heat > 0.55 ? blink() : 0;
+            }} />
+            <Label text="✖ FIRE" p={p} color="#ffffff" bg="#e0641c" size={0.9} opacityRef={() => {
+              const s = equipState(e.id);
+              return s && s.fire > 0 ? blink() : 0;
+            }} />
+            <Label text="▲ OVERLOAD" p={[p[0], p[1] + 1.4, p[2]]} color="#1a0d00" bg="#ffb020" size={0.8} opacityRef={() => {
+              const s = equipState(e.id);
+              return s && !s.tripped && s.load > 1.1 ? blink() : 0;
+            }} />
+          </group>
+        );
+      })}
     </>
   );
 }

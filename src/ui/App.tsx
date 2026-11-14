@@ -3,7 +3,8 @@ import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { playEvent, resumeAudio, setAmbience, setVolumes, sfx } from "@/audio/sound";
 import { CAMPAIGN } from "@/sim/missions";
-import { onFx } from "@/state/fx";
+import { botStep } from "@/sim/bot";
+import { onFx, viewFx } from "@/state/fx";
 import { useGame } from "@/state/game";
 import { useSave } from "@/state/save";
 import { Hud } from "./Hud";
@@ -45,7 +46,18 @@ export default function App() {
 
   // Test / debug hook: lets browser tests and the console drive the game.
   useEffect(() => {
-    (window as unknown as Record<string, unknown>).__gridkeeper = { game: useGame, save: useSave, campaign: CAMPAIGN };
+    (window as unknown as Record<string, unknown>).__gridkeeper = {
+      game: useGame,
+      save: useSave,
+      campaign: CAMPAIGN,
+      /** Screen position of a world point, for automated interaction tests. */
+      project: (p: [number, number, number]) => viewFx.project?.(p) ?? null,
+      /** One decision step of the scripted reference defender. */
+      bot: () => {
+        const s = useGame.getState();
+        if (s.game && s.mission) botStep(s.game, s.mission);
+      },
+    };
   }, []);
 
   // Global keyboard shortcuts.

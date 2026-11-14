@@ -90,6 +90,8 @@ function Link({ link, curve }: { link: LinkDef; curve: THREE.QuadraticBezierCurv
   const mission = useGame((s) => s.mission)!;
   const selected = useGame((s) => s.selected?.type === "link" && s.selected.id === link.id);
   const hovered = useGame((s) => s.hovered?.type === "link" && s.hovered.id === link.id);
+  // Conduit handles only exist in the cyber view; never let them catch clicks in the physical view.
+  const cyber = useGame((s) => s.view === "cyber");
   const geo = useMemo(() => new THREE.TubeGeometry(curve, 24, 0.09, 5, false), [curve]);
   const mat = useMemo(() => basic({ opacity: 0 }), []);
   const packets = useRef<THREE.InstancedMesh>(null);
@@ -169,7 +171,7 @@ function Link({ link, curve }: { link: LinkDef; curve: THREE.QuadraticBezierCurv
       </instancedMesh>
       {link.conduit && (
         <group position={mid}>
-          <Selectable pick={{ type: "link", id: link.id }}>
+          <Selectable pick={{ type: "link", id: link.id }} disabled={!cyber}>
             <group ref={handle}>
               <mesh material={handleMat} renderOrder={10}>
                 <octahedronGeometry args={[0.55, 0]} />

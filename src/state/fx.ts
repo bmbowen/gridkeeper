@@ -20,6 +20,8 @@ export const viewFx = {
   /** Camera focus request consumed by the camera rig. */
   focus: null as null | [number, number, number],
   cameraMoved: false,
+  /** World → screen projection, installed by the canvas (used by tooltips and browser tests). */
+  project: null as null | ((p: [number, number, number]) => [number, number]),
   fps: 60,
   drawCalls: 0,
   triangles: 0,

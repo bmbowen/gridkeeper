@@ -223,3 +223,9 @@ h1, h2, h3, p { margin: 0; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 .reduced *, .reduced *::before, .reduced *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+@media (max-width: 760px) {
+  .gauges { overflow-x: auto; justify-content: flex-start; scrollbar-width: none; }
+  .gauge { min-width: 88px; flex: none; }
+  .prep { padding: 8px 10px; gap: 8px; } .prep p { font-size: 12.5px; }
+  .hud-ctrl { flex-wrap: wrap; }
+}

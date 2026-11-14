@@ -4,7 +4,8 @@ import * as THREE from "three";
 import type { MissionDef, Vec3 } from "@/sim/types";
 import { MAT } from "../materials";
 import { Beam, Box, Label, Particles } from "../parts";
-import { seeded } from "../util";
+import { viewFx } from "@/state/fx";
+import { game, seeded } from "../util";
 import { Fence, Ground, LightPole, Scatter, Slab } from "./common";
 
 const sand = new THREE.MeshStandardMaterial({ color: "#8a5a3c", roughness: 1 });
@@ -91,7 +92,7 @@ function ControlHouse({ rect }: { rect: [number, number, number, number] }) {
       <Box p={[x0 - 1.2, 0.8, cz - 2]} s={[1.6, 1.4, 1.6]} m={MAT.paintLight} />
       <Box p={[x0 - 1.2, 0.8, cz + 1]} s={[1.6, 1.4, 1.6]} m={MAT.paintLight} />
       <pointLight position={[cx, 3.2, cz]} color="#bfe6ff" intensity={38} distance={20} decay={1.7} />
-      <Label text="CONTROL HOUSE" p={[cx, 4.6, z0]} size={0.7} color="#9fd8ff" opacityRef={() => 0.55} />
+      <Label text="CONTROL HOUSE" p={[cx, 4.6, z0]} size={0.7} color="#9fd8ff" opacityRef={() => 0.55 * (1 - viewFx.mix)} />
     </group>
   );
 }
@@ -162,7 +163,7 @@ export function Desert({ mission }: { mission: MissionDef }) {
         <Saguaro key={s.seed} {...s} />
       ))}
       {/* drifting dust catching the low sun */}
-      <Particles p={[0, 0.5, 5]} count={70} rate={() => 9} color="#ffb070" intensity={1.4} size={[0.35, 0.6]} life={[5, 9]} velocity={[2.2, 0.25, 0.6]} jitter={0.8} radius={55} opacity={0.35} additive />
+      <Particles p={[0, 0.5, 5]} count={110} rate={() => (game()?.weather === "wind" ? 26 : 8)} color="#ffb070" intensity={1.4} size={[0.35, 0.6]} life={[5, 9]} velocity={[2.2, 0.25, 0.6]} jitter={0.8} radius={55} opacity={0.35} additive />
     </group>
   );
 }

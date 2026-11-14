@@ -426,6 +426,7 @@ export function Feeder({ def }: EquipProps) {
   const label = String(def.visual?.label ?? def.name.toUpperCase());
   const variant = label.includes("HOSPITAL") ? "hospital" : label.includes("WELL") ? "works" : "town";
   const run = 34;
+  const dz = Number(def.visual?.dz ?? 0);
   const wires = useMemo(() => {
     const out: THREE.Curve<THREE.Vector3>[] = [];
     const xs = [0, 9, 18, 27];
@@ -451,8 +452,8 @@ export function Feeder({ def }: EquipProps) {
       {wires.map((c, i) => (
         <Tube key={i} curve={c} radius={0.03} m={MAT.wire} segments={8} radial={3} />
       ))}
-      <LitBuildings p={[run, 0, 0]} power={power} variant={variant} seed={label.length} spread={variant === "town" ? 9 : 6} count={variant === "town" ? 16 : 5} />
-      <Label text={label} p={[run, variant === "hospital" ? 11.5 : 8, 0]} size={0.8} color="#ffe2b0" opacityRef={() => 0.85} />
+      <LitBuildings p={[run, 0, dz]} power={power} variant={variant} seed={label.length} spread={variant === "town" ? 7 : 5} count={variant === "town" ? 16 : 5} />
+      <Label text={label} p={[run, variant === "hospital" ? 11.5 : 8, dz]} size={0.8} color="#ffe2b0" opacityRef={() => 0.85} />
     </group>
   );
 }
