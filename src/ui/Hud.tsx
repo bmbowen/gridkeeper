@@ -130,7 +130,7 @@ function equipDot(g: GameState, id: string): string {
   return "var(--green)";
 }
 
-function LeftColumn({ g, m }: { g: GameState; m: MissionDef }) {
+function LeftColumn({ g, m, shown }: { g: GameState; m: MissionDef; shown: boolean }) {
   const selected = useGame((s) => s.selected);
   const tutKey = useTutorial((s) => (s.active ? TUTORIAL[s.index]?.highlight : undefined));
   const [open, setOpen] = useState(true);
@@ -143,7 +143,7 @@ function LeftColumn({ g, m }: { g: GameState; m: MissionDef }) {
   const analysts = freeSlots(g, "analyst");
   const crew = freeSlots(g, "crew");
   return (
-    <div className="hud-left">
+    <div className={`hud-left ${shown ? "shown" : ""}`}>
       <div className="panel card objectives">
         <h3>Objectives</h3>
         <ul>
@@ -655,6 +655,7 @@ export function Hud() {
   const result = useGame((s) => s.result);
   const paused = useGame((s) => s.paused);
   const showPerf = useSave((s) => s.settings.showPerf);
+  const [assetsShown, setAssetsShown] = useState(false);
   const tutKey = useTutorial((s) => (s.active ? TUTORIAL[s.index]?.highlight : undefined));
 
   // Start the guided tutorial on the first mission until the player finishes or skips it.
@@ -677,7 +678,12 @@ export function Hud() {
     <>
       <Mood g={g} m={m} />
       <TopBar g={g} m={m} />
-      {!over && <LeftColumn g={g} m={m} />}
+      {!over && <LeftColumn g={g} m={m} shown={assetsShown} />}
+      {!over && (
+        <button className="btn small assets-toggle" onClick={() => setAssetsShown(!assetsShown)} aria-expanded={assetsShown} data-testid="assets-toggle">
+          {assetsShown ? "Close list" : "Assets"}
+        </button>
+      )}
       {!over && (
         <div className="hud-right">
           <Inspector g={g} m={m} />

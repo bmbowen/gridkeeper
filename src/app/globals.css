@@ -242,3 +242,10 @@ h1, h2, h3, p { margin: 0; }
 .floater { position: absolute; right: 10px; top: 100%; font-family: var(--mono); font-weight: 700; font-size: 15px; color: #ff8a8a; pointer-events: none; animation: floatDown 1.3s ease-out both; text-shadow: 0 0 8px rgba(0, 0, 0, 0.9); }
 @keyframes floatDown { from { opacity: 1; transform: translateY(-6px); } to { opacity: 0; transform: translateY(26px); } }
 .btn:active:not(:disabled) { filter: brightness(1.5); }
+
+/* Small screens: the asset list is a drawer opened from a button. */
+.assets-toggle { display: none; position: absolute; left: 8px; top: 132px; z-index: 6; }
+@media (max-width: 760px) {
+  .assets-toggle { display: block; }
+  .hud-left.shown { display: flex; left: 8px; right: 8px; top: 168px; width: auto; max-height: 52vh; z-index: 6; }
+}

@@ -85,7 +85,7 @@ export const level1: MissionDef = {
     { at: 130, type: "weather", value: "wind", text: "Evening wind is picking up across the mesa." },
   ],
   tools: ["sensor", "investigate", "isolate", "remediate"],
-  lose: { productionBelow: 0.4, seconds: 20 },
+  lose: { productionBelow: 0.4, seconds: 40 },
   stars: { safety: 90, uptime: 92, containment: 75 },
   achievements: [
     { id: "l1-lights", name: "Not a Flicker", desc: "Finish without a single breaker trip.", test: (g) => g.stats.trips === 0 },

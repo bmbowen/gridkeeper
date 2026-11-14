@@ -6,8 +6,24 @@ import type { Command, GameState, MissionDef } from "./types";
  * A simple scripted defender that only uses information the player can see.
  * Used by tests to prove every mission is winnable, and to balance waves.
  */
-export function botStep(g: GameState, m: MissionDef, opts: { skilled?: boolean } = {}): void {
-  const tryCmd = (c: Command) => (commandBlocked(g, m, c) ? false : command(g, m, c).ok);
+const paceState = new WeakMap<GameState, { next: number }>();
+
+/**
+ * `pace` models a human: once live, the defender issues at most one command every `pace`
+ * seconds (finding the asset, reading the inspector, clicking). 0 = instant reactions.
+ */
+export function botStep(g: GameState, m: MissionDef, opts: { skilled?: boolean; pace?: number } = {}): void {
+  const pace = opts.pace ?? 0;
+  let st = paceState.get(g);
+  if (!st) paceState.set(g, (st = { next: 0 }));
+  const tryCmd = (c: Command) => {
+    if (commandBlocked(g, m, c)) return false;
+    if (pace > 0 && g.phase === "running") {
+      if (g.time < st!.next) return false;
+      st!.next = g.time + pace;
+    }
+    return command(g, m, c).ok;
+  };
   const has = (t: string) => (m.tools as string[]).includes(t);
 
   if (g.phase === "prep") {
@@ -32,7 +48,9 @@ export function botStep(g: GameState, m: MissionDef, opts: { skilled?: boolean }
   }
   if (g.phase !== "running") return;
 
-  for (const n of m.nodes) {
+  const occupied = new Set(g.threats.filter((t) => t.phase !== "dead" && t.identified).map((t) => (t.phase === "moving" ? t.to : t.node)));
+  const urgency = (id: string) => (g.nodes[id].knowledge === "confirmed" ? (occupied.has(id) ? 0 : 1) : g.nodes[id].knowledge === "suspicious" ? 2 : 3);
+  for (const n of [...m.nodes].sort((a, b) => urgency(a.id) - urgency(b.id))) {
     const s = g.nodes[n.id];
     if (s.knowledge === "suspicious") tryCmd({ type: "investigate", node: n.id });
     if (s.knowledge === "confirmed") {

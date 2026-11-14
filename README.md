@@ -34,10 +34,10 @@ npm run dev          # http://localhost:3000
 
 1. **Prepare.** The clock is stopped. Open the **Cyber view** (TAB) and deploy passive sensors where traffic converges.
 2. **Go live.** Income follows production. Intrusions arrive on a schedule hinted at by the timeline.
-3. **See.** Monitored links show traffic. A sensor that notices something marks the asset *suspicious* (amber).
+3. **See.** Monitored links show traffic. A sensor that notices something marks the asset the intruder is on, or heading for, *suspicious* (amber).
 4. **Confirm.** *Investigate* with an analyst. A real intrusion turns red and reveals the actor, its route and its target.
 5. **Contain.** *Isolate* the asset. The intruder is trapped, but equipment that depends on the asset degrades.
-6. **Clean.** *Remediate* to evict the actor. If it still holds an earlier foothold it falls back there.
+6. **Clean.** *Remediate* to evict the actor. From an isolated asset it is trapped and removed; from a connected one it slips back to an earlier foothold.
 7. **Restore.** *Reconnect* the asset. Send crews to *restore* tripped equipment and *repair* damage.
 
 Later missions add hardening, network segmentation, operator setpoints (throttle, e-stop, load shedding) and deception tripwires.

@@ -4,7 +4,7 @@
 
 | Area | State |
 | --- | --- |
-| Simulation engine | Deterministic, fixed 10 Hz timestep, seeded, independent of React. 37 Vitest tests. |
+| Simulation engine | Deterministic, fixed 10 Hz timestep, seeded, independent of React. 38 Vitest tests. |
 | Level 1 · First Contact | Desert substation at dusk. Guided 13-step tutorial. Played start to finish through the UI by the browser tests. |
 | Level 2 · Pressure Drop | Water treatment plant. Adds hardening, segmentation, buffer tanks, demand peaks. |
 | Level 3 · Heat Signature | Three-unit power station at night. Adds throttling against thermal margin. |
@@ -23,7 +23,12 @@ Every mission is checked automatically for four things: its data is consistent, 
 
 ## Verified by automation, not by a human playthrough
 
-- Levels 2–5 are proven winnable (1–2 stars basic, 3 stars skilled) by scripted defenders with instant reactions, and were inspected in screenshots in both views and during incidents. Nobody has hand-played them, so the difficulty curve is tuned by simulation rather than by feel. A human with slower reactions will find them harder than the scripts do.
+- Levels 2–5 have not been hand-played. Difficulty is calibrated with scripted defenders that only use player-visible information, at three speeds:
+  - **Instant reactions:** three stars on every level.
+  - **One action every 2 s:** three stars on every level.
+  - **One action every 4 s:** one star on Level 1, three on Levels 2 and 3, and a loss on Levels 4 and 5.
+
+  So the campaign is forgiving for a quick or pause-happy player and punishing late on for a slow one. Whether that curve feels right to a person is untested, and Levels 2 and 3 may be too easy.
 - Frame rate was only measured under software rendering in a headless browser. Performance on real GPUs is untested.
 - Audio, including the score, was written and wired but could not be listened to in the build environment. Mix levels are a first guess.
 - Touch input relies on the standard orbit controls and was not tested on a device.
@@ -32,11 +37,10 @@ Every mission is checked automatically for four things: its data is consistent, 
 
 - **Level 4 draw calls** are the highest of any level (about 1,260 at close zoom). Robots and racking are candidates for instancing.
 - **Segmentation** holds an ordinary intruder for about 20 s, then it tunnels through slowly and raises an alert. With instant reactions that alert is always enough to catch it; whether it feels fair to a human is untested.
-- **Sensors flag the asset an intruder just left**, which can mark an unsensored neighbour as suspicious. It is consistent, but can surprise.
 - **Level 5 framing.** The site is wide, so some assets sit under HUD panels at the home camera until you pan.
 - **Level 2 river** is a flat surface above the ground plane rather than a cut channel.
 - **Level 5 "Heartbeat" achievement** checks the end state of the Downtown district, not its whole history.
-- **Phones.** The layout works at 390 px wide, but the asset list is hidden there and the tutorial's list highlights do not appear.
+- **Phones.** The layout works at 390 px wide with the asset list in a drawer, but it has not been tried on a real device.
 
 ## Not built
 

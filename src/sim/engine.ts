@@ -702,8 +702,8 @@ function stepDetection(g: GameState, m: MissionDef, dt: number) {
     if (covered && !t.identified) {
       t.detect += dt;
       if (t.detect >= PROFILES[t.profile].stealth) {
-        // In transit the traffic originates from the foothold it just left.
-        const where = t.phase === "moving" ? t.from : t.node;
+        // Flag where the session is heading, so the defender can get ahead of it.
+        const where = t.phase === "moving" ? t.to : t.node;
         markSuspicious(g, m, where, "Suspicious activity", `Passive sensor flagged unusual traffic at ${topo.node[where].name}. Investigate to confirm.`);
       }
     } else if (!covered) {
@@ -731,8 +731,10 @@ function finishJob(g: GameState, m: MissionDef, j: Job) {
   const topo = topology(m);
   if (j.type === "investigate") {
     const n = g.nodes[j.target];
-    const present = g.threats.filter((t) => t.phase !== "dead" && ((t.phase !== "moving" && t.node === j.target) || t.trail.includes(j.target)));
-    if (n.compromised || present.some((t) => t.node === j.target && t.phase !== "moving")) {
+    // Evidence: an actor on the asset, inbound to it, or a foothold it left behind.
+    const inbound = (t: ThreatState) => t.phase === "moving" && t.to === j.target;
+    const present = g.threats.filter((t) => t.phase !== "dead" && ((t.phase !== "moving" && t.node === j.target) || inbound(t) || t.trail.includes(j.target)));
+    if (n.compromised || present.some((t) => inbound(t) || (t.node === j.target && t.phase !== "moving"))) {
       n.knowledge = "confirmed";
       for (const t of present) t.identified = true;
       emit(g, { type: "confirmed", node: j.target });
@@ -754,9 +756,12 @@ function finishJob(g: GameState, m: MissionDef, j: Job) {
     for (const t of g.threats) {
       if (t.phase === "dead") continue;
       t.trail = t.trail.filter((x) => x !== j.target);
-      if (t.phase === "moving" || t.node !== j.target) continue;
-      // Evicted: fall back to the most recent foothold that is still live and reachable.
-      const fallback = [...t.trail].reverse().find((x) => g.nodes[x].compromised && !g.nodes[x].isolated);
+      const inbound = t.phase === "moving" && t.to === j.target;
+      if (!inbound && (t.phase === "moving" || t.node !== j.target)) continue;
+      if (inbound) t.node = t.from;
+      // Evicted from a connected asset it slips back to its most recent live foothold.
+      // Evicted from an isolated asset it is trapped: there is no way out, and it is gone.
+      const fallback = n.isolated ? undefined : [...t.trail].reverse().find((x) => g.nodes[x].compromised && !g.nodes[x].isolated);
       if (fallback) {
         t.node = fallback;
         t.phase = "evicted";
@@ -764,14 +769,14 @@ function finishJob(g: GameState, m: MissionDef, j: Job) {
         t.progress = 0;
         t.identified = true;
         emit(g, { type: "evicted", threat: t.id, node: fallback });
-        alert(g, "warn", "Actor fell back", `Evicted from ${topo.node[j.target].name}, but it still holds ${topo.node[fallback].name}. Clean that foothold too.`, { node: fallback });
+        alert(g, "warn", "Actor fell back", `Evicted from ${topo.node[j.target].name}, but it slipped back to ${topo.node[fallback].name}. Isolate before you remediate to trap it.`, { node: fallback });
         if (g.nodes[fallback].knowledge !== "confirmed") {
           g.nodes[fallback].knowledge = "confirmed";
           emit(g, { type: "confirmed", node: fallback });
         }
       } else {
         killThreat(g, t);
-        alert(g, "good", "Threat eliminated", `${PROFILES[t.profile].name} removed from ${topo.node[j.target].name}. No footholds remain.`, { node: j.target });
+        alert(g, "good", "Threat eliminated", `${PROFILES[t.profile].name} removed from ${topo.node[j.target].name}.`, { node: j.target });
       }
     }
   } else if (j.type === "restore") {

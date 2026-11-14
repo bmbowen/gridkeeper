@@ -145,28 +145,46 @@ describe("hardening, tripwires and eviction", () => {
     expect(g.nodes.plcA.compromised).toBe(false);
   });
 
-  it("an evicted actor falls back to a live foothold, and dies when none remain", () => {
+  it("remediating a connected asset lets the actor slip back; isolating first traps and removes it", () => {
+    const m = fixture(waves);
+    const upTo = () => {
+      const g = start(m);
+      for (const n of ["gw", "sw"]) command(g, m, { type: "sensor", node: n });
+      command(g, m, { type: "start" });
+      for (let i = 0; i < 3000 && !(g.threats[0]?.phase === "compromising" && g.threats[0].node === "sw"); i++) step(g, m);
+      command(g, m, { type: "investigate", node: "sw" });
+      run(g, m, 4.2);
+      expect(g.nodes.sw.knowledge).toBe("confirmed");
+      return g;
+    };
+    // Connected: evicted, but it falls back to the gateway foothold and is still alive.
+    const loose = upTo();
+    command(loose, m, { type: "remediate", node: "sw" });
+    for (let i = 0; i < 80 && loose.jobs.length; i++) step(loose, m);
+    expect(loose.stats.remediations).toBe(1);
+    expect(loose.threats[0].phase).not.toBe("dead");
+    expect(loose.threats[0].trail).toContain("gw");
+    // Isolated first: trapped and eliminated.
+    const trapped = upTo();
+    command(trapped, m, { type: "isolate", node: "sw" });
+    command(trapped, m, { type: "remediate", node: "sw" });
+    run(trapped, m, 5);
+    expect(trapped.threats[0].phase).toBe("dead");
+    expect(trapped.stats.threatsEliminated).toBe(1);
+  });
+
+  it("a sensor flags the asset an intruder is heading for, and investigating it confirms", () => {
     const m = fixture(waves);
     const g = start(m);
-    for (const n of ["gw", "sw"]) command(g, m, { type: "sensor", node: n });
+    command(g, m, { type: "sensor", node: "sw" });
     command(g, m, { type: "start" });
-    for (let i = 0; i < 3000 && !g.nodes.sw.compromised; i++) step(g, m);
-    command(g, m, { type: "isolate", node: "sw" }); // trap it before it moves on
+    for (let i = 0; i < 3000 && g.nodes.sw.knowledge === "none"; i++) step(g, m);
+    expect(g.nodes.sw.knowledge).toBe("suspicious");
+    expect(g.nodes.gw.knowledge).toBe("none"); // not the asset it left behind
     command(g, m, { type: "investigate", node: "sw" });
-    run(g, m, 4.5);
+    run(g, m, 4.2);
     expect(g.nodes.sw.knowledge).toBe("confirmed");
-    expect(g.threats[0].contained).toBe(true);
-    command(g, m, { type: "remediate", node: "sw" });
-    run(g, m, 5);
-    const t = g.threats[0];
-    expect(t.phase).not.toBe("dead");
-    expect(t.node).toBe("gw"); // fell back to the gateway foothold
-    expect(g.nodes.gw.knowledge).toBe("confirmed");
-    command(g, m, { type: "isolate", node: "gw" });
-    command(g, m, { type: "remediate", node: "gw" });
-    run(g, m, 6);
-    expect(t.phase).toBe("dead");
-    expect(g.stats.threatsEliminated).toBe(1);
+    expect(g.threats[0].identified).toBe(true);
   });
 });
 

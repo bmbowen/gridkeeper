@@ -37,7 +37,7 @@ export const TUTORIAL: TutStep[] = [
   { id: "analyst", text: "Your analyst is on it. Investigations take a few seconds and you only have two analysts, so choose what to look at.", done: (c) => nodes(c.g).some((n) => n.knowledge === "confirmed") || (c.g.jobs.length === 0 && nodes(c.g).every((n) => n.knowledge === "none")) },
   { id: "isolate", text: "Intrusion confirmed, and you can now see where the actor is heading. ISOLATE the red asset: it is cut off the network and the intruder is trapped. Isolation is not free, though. Whatever depends on that asset degrades.", highlight: "act-isolate", pause: true, done: (c) => nodes(c.g).some((n) => n.isolated) || c.g.stats.remediations > 0 || nodes(c.g).every((n) => n.knowledge !== "confirmed") },
   { id: "remediate", text: "Contained. Now REMEDIATE to evict the intruder and rebuild the asset. It costs 40 credits and is faster on an isolated asset.", highlight: "act-remediate", done: (c) => c.g.stats.remediations > 0 },
-  { id: "reconnect", text: "Clean. RECONNECT the asset so operations return to normal. If the actor fell back to an earlier foothold, clean that one too.", highlight: "act-reconnect", done: (c) => nodes(c.g).every((n) => !n.isolated) },
+  { id: "reconnect", text: "Trapped and gone. RECONNECT the asset so operations return to normal. Always isolate before you remediate: an actor evicted from a connected asset just slips back to where it came from.", highlight: "act-reconnect", done: (c) => nodes(c.g).every((n) => !n.isolated) },
   { id: "final", text: "That is the loop: see, confirm, contain, clean, restore. If a breaker trips, select the equipment and send a crew to RESTORE it. More visitors are coming. You have the watch.", manual: true, done: () => false },
 ];
 
