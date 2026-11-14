@@ -18,10 +18,10 @@ export const PORTS: Partial<Record<EquipKind, Port>> = {
   transformer: { in: [-1.5, 6.5, 0], out: [1.7, 4.7, 0], spread: 1.1 },
   feeder: { in: [-0.3, 6.3, 0], out: [0.3, 6.3, 0], spread: 1.1 },
   // water
-  intake: { in: [-2, 1.2, 0], out: [3, 1.2, 0] },
+  intake: { in: [-2, 1.1, 0], out: [3, 1.1, 0] },
   pump: { in: [-2.2, 1.1, 0], out: [1.6, 1.1, 0] },
   valve: { in: [-1, 1.1, 0], out: [1, 1.1, 0] },
-  clarifier: { in: [-5.2, 1.2, 0], out: [5.2, 1.2, 0] },
+  clarifier: { in: [-5.2, 1.1, 0], out: [5.2, 1.1, 0] },
   doser: { in: [-1.2, 1.1, 0], out: [1.2, 1.1, 0] },
   tank: { in: [-3.6, 1.1, 0], out: [3.6, 1.1, 0] },
   district: { in: [-3, 1.1, 0], out: [3, 1.1, 0] },

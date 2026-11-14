@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import type { EquipDef, EquipKind } from "@/sim/types";
 import { Selectable } from "../parts";
 import { Breaker, FanBank, Feeder, Source, Transformer } from "./substation";
+import { Clarifier, District, Doser, Intake, Pump, Tank, Valve } from "./water";
 
 /** 3D model for each equipment kind. */
 export const EQUIPMENT: Partial<Record<EquipKind, ComponentType<{ def: EquipDef }>>> = {
@@ -11,6 +12,13 @@ export const EQUIPMENT: Partial<Record<EquipKind, ComponentType<{ def: EquipDef 
   transformer: Transformer,
   fan: FanBank,
   feeder: Feeder,
+  intake: Intake,
+  pump: Pump,
+  valve: Valve,
+  clarifier: Clarifier,
+  doser: Doser,
+  tank: Tank,
+  district: District,
 };
 
 export function EquipmentLayer({ equipment }: { equipment: EquipDef[] }) {
